@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Calculadora de Locação – Backdrop & Boxtruss (Interno)</title>
+  <title>Calculadora de Locação — Backdrop & Boxtruss (Interno)</title>
   <style>
     :root{
       --bg:#0b0b0c; --card:#18181b; --muted:#a1a1aa; --text:#fff; --line:#2b2b30; --accent:#10b981;
@@ -39,10 +39,10 @@
   <div class="wrap">
     <header>
       <div>
-        <h1>Calculadora de Locação – Backdrop & Boxtruss</h1>
-        <div class="muted k">Até 4 dias sem alteração de valor • Válido para serviços no município do Rio de Janeiro – RJ</div>
+        <h1>Calculadora de Locação — Backdrop & Boxtruss</h1>
+        <div class="muted k">Válido para serviços no município do Rio de Janeiro – RJ</div>
       </div>
-      <div class="muted k">vHTML/JS 1.0</div>
+      <div class="muted k">vHTML/JS 1.1</div>
     </header>
 
     <div class="row no-print" style="gap:10px;flex-wrap:wrap">
@@ -89,36 +89,24 @@
           <div class="tiny" style="margin-top:4px">Clique para preencher largura/altura automaticamente.</div>
         </div>
 
-        <div class="grid cols-3">
-          <div>
-            <label>Dias de locação</label>
-            <input id="dias" type="number" min="1" value="1">
-            <div class="tiny">Até 4 dias: sem acréscimo.</div>
-          </div>
+        <div class="grid cols-2">
           <div>
             <label>Iluminação Ribaltas LED (qtd)</label>
             <input id="iluminacaoQtd" type="number" min="0" value="0">
           </div>
-          <div class="row" style="align-items:end">
-            <label class="row" style="margin:0">
-              <input id="duplaFace" type="checkbox"> Dupla face
-            </label>
-          </div>
-        </div>
-
-        <div class="grid cols-2">
           <div class="row">
             <label class="row" style="margin:0">
               <input id="foraHorario" type="checkbox"> Montagem/Desmontagem fora do horário
             </label>
           </div>
-          <div>
-            <label>Extra fora do horário (R$ fixo)</label>
-            <input id="extraForaHorarioValor" type="number" step="1" value="300">
-          </div>
         </div>
 
-        <div class="tiny">Valores válidos para serviço realizado no município do Rio de Janeiro – RJ.</div>
+        <div>
+          <label>Extra fora do horário (R$ fixo)</label>
+          <input id="extraForaHorarioValor" type="number" step="1" value="300">
+        </div>
+
+        <div class="tiny">Valores válidos para serviço realizado no município do Rio de Janeiro – RJ. Locação padrão: 2 dias.</div>
       </div>
 
       <div class="card">
@@ -143,10 +131,6 @@
           <div>
             <label>Iluminação Ribalta LED (R$/un)</label>
             <input id="iluminacaoUnit" type="number" step="0.01" value="100">
-          </div>
-          <div>
-            <label>Dupla face (x)</label>
-            <input id="duplaFaceMult" type="number" step="0.1" value="2">
           </div>
           <div>
             <label>Impostos NF (%)</label>
@@ -177,8 +161,8 @@
     <!-- Área invisível usada na impressão/PDF -->
     <div id="printArea" class="print-block">
       <div style="padding:24px;color:#111">
-        <h1 style="margin:0 0 8px 0;font-size:22px">Proposta de Locação – Backdrop & Boxtruss</h1>
-        <div style="font-size:12px;color:#444">Válida para serviços no município do Rio de Janeiro – RJ. Até 4 dias sem alteração de valor.</div>
+        <h1 style="margin:0 0 8px 0;font-size:22px">Proposta de Locação — Backdrop & Boxtruss</h1>
+        <div style="font-size:12px;color:#444">Válida para serviços no município do Rio de Janeiro – RJ. Locação padrão: 2 dias.</div>
         <hr>
         <div id="pdfInfo" style="font-size:13px"></div>
         <table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:13px">
@@ -187,13 +171,13 @@
         <hr>
         <div style="font-size:11px;line-height:1.5">
           <p><b>Observação:</b> Serviços realizados fora do horário comercial, aos finais de semana ou em feriados poderão ter taxa adicional. Quando aplicável, essa taxa será previamente discriminada na proposta, de acordo com a necessidade e a solicitação do cliente.</p>
-          <p>Condições de pagamento: Pix, depósito, boleto (sujeito à aprovação), cartão (taxas), e cripto.</p>
+          <p>Condições de pagamento: Pix, depósito bancário, boleto (sujeito à aprovação), cartão de crédito (com acréscimo de taxas da operadora), e cripto.</p>
         </div>
       </div>
     </div>
 
     <footer class="tiny">
-      Regras: estrutura por metro linear; banner por m²; para painéis envelopados, a lona considera +40cm na largura e +20cm na altura; até 4 dias não alteram o valor; extra fixo de R$ 300 quando houver montagem ou desmontagem fora do horário comercial; impostos NF listados separadamente.
+      Regras: estrutura por metro linear; banner por m²; para painéis envelopados, a lona considera +40cm na largura e +20cm na altura; locação padrão de 2 dias; extra fixo de R$ 300 quando houver montagem ou desmontagem fora do horário comercial; impostos NF listados separadamente.
     </footer>
   </div>
 
@@ -223,9 +207,8 @@
       const tipo = $('tipo').value;
       const w = num($('largura'));
       const h = num($('altura'));
-      const dias = Math.max(1, parseInt($('dias').value || '1', 10));
+      const dias = 2; // Fixo em 2 dias
       const iluminacaoQtd = Math.max(0, parseInt($('iluminacaoQtd').value || '0', 10));
-      const duplaFace = $('duplaFace').checked;
       const foraHorario = $('foraHorario').checked;
 
       const bannerM2 = num($('bannerM2'));
@@ -233,7 +216,6 @@
       const boxtrussML = num($('boxtrussML'));
       const metalonML = num($('metalonML'));
       const iluminacaoUnit = num($('iluminacaoUnit'));
-      const duplaFaceMult = num($('duplaFaceMult'));
       const impostosPct = num($('impostosPct'))/100;
       const extraForaHorarioValor = num($('extraForaHorarioValor'));
 
@@ -247,13 +229,12 @@
       const bannerM2Rate = isEnv ? bannerM2Env : bannerM2;
 
       const bannerArea = lonaW * lonaH;
-      const bannerCusto = bannerArea * bannerM2Rate * (duplaFace ? (duplaFaceMult||2) : 1);
+      const bannerCusto = bannerArea * bannerM2Rate;
 
       const estruturaCusto = perimetro * estruturaML;
       const iluminacaoCusto = iluminacaoQtd * iluminacaoUnit;
 
-      const diasMult = 1; // até 4 dias sem acréscimo
-      const baseServicos = (estruturaCusto + bannerCusto + iluminacaoCusto) * diasMult;
+      const baseServicos = estruturaCusto + bannerCusto + iluminacaoCusto;
 
       const extraForaHorario = foraHorario ? extraForaHorarioValor : 0;
 
@@ -262,7 +243,7 @@
       const total = subtotal + impostos;
 
       return {
-        tipo, w, h, dias, iluminacaoQtd, duplaFace, foraHorario,
+        tipo, w, h, dias, iluminacaoQtd, foraHorario,
         perimetro, lonaW, lonaH, bannerArea,
         estruturaCusto, bannerCusto, iluminacaoCusto,
         extraForaHorario, subtotal, impostos, total,
@@ -279,7 +260,7 @@
         <li>Perímetro estrutural: <b class="val">${c.perimetro.toFixed(2)} m</b></li>
         <li>Lona (cálculo): <b class="val">${c.lonaW.toFixed(2)} m</b> × <b class="val">${c.lonaH.toFixed(2)} m</b> = <b class="val">${c.bannerArea.toFixed(2)} m²</b></li>
         <li>Estrutura: <b class="val">${moeda(c.estruturaCusto)}</b></li>
-        <li>Banner ${c.duplaFace ? '(dupla face)' : ''}: <b class="val">${moeda(c.bannerCusto)}</b></li>
+        <li>Banner: <b class="val">${moeda(c.bannerCusto)}</b></li>
         <li>Iluminação Ribaltas LED: <b class="val">${moeda(c.iluminacaoCusto)}</b></li>
         ${c.foraHorario ? `<li>Extra fora do horário: <b class="val">${moeda(c.extraForaHorario)}</b></li>` : ''}
       `;
@@ -296,16 +277,21 @@
       $('texto').value =
 `LOCAÇÃO ${c.tipo === 'metalon' ? 'DE PAINEL BACKDROP (METALON)' : 'DE ESTRUTURA BOXTRUSS'}
 
-Formato: ${c.w.toFixed(2)} x ${c.h.toFixed(2)} m${c.tipo==='boxtruss_envelopado' ? ' (painel envelopado)' : ''}${c.duplaFace ? ' – impressão dupla face' : ''}.
+Formato: ${c.w.toFixed(2)} x ${c.h.toFixed(2)} m${c.tipo==='boxtruss_envelopado' ? ' (painel envelopado)' : ''}
 Iluminação: ${c.iluminacaoQtd > 0 ? c.iluminacaoQtd + ' Ribalta(s) LED' : 'não'}
-Dias de locação: ${c.dias} (até 4 dias sem acréscimo)${c.foraHorario ? `
+Locação: 2 dias${c.foraHorario ? `
 Extra: Montagem/Desmontagem fora do horário – ${moeda(c.extraForaHorario)}` : ''}
 
 Subtotal: ${moeda(c.subtotal)}
 Impostos NF (${(c.impostosPct*100).toFixed(0)}%): ${moeda(c.impostos)}
 TOTAL: ${moeda(c.total)}
 
-Valores válidos para serviço realizado no município do Rio de Janeiro – RJ. Instalação e retirada inclusas.
+Estão inclusos no orçamento:
+✅ Locação da estrutura Backdrop
+✅ Impressão digital em lona fosca
+✅ Serviço de instalação e retirada
+
+Valores válidos para serviço realizado no município do Rio de Janeiro – RJ.
 
 Observação: Serviços realizados fora do horário comercial, aos finais de semana ou em feriados poderão ter taxa adicional. Quando aplicável, essa taxa será previamente discriminada na proposta, de acordo com a necessidade e a solicitação do cliente.
 
@@ -314,13 +300,14 @@ Condições de pagamento: Pix, depósito, boleto (sujeito à aprovação), cart�
       // Preparar conteúdo do PDF
       $('pdfInfo').innerHTML = `
         <div><b>Tipo:</b> ${c.tipo === 'metalon' ? 'Backdrop (Metalon tipo caixa)' : (c.tipo === 'boxtruss_envelopado' ? 'Boxtruss envelopado' : 'Boxtruss aparente')}</div>
-        <div><b>Formato:</b> ${c.w.toFixed(2)} × ${c.h.toFixed(2)} m ${c.tipo==='boxtruss_envelopado' ? '(envelopado)' : ''}${c.duplaFace ? ' – impressão dupla face' : ''}</div>
+        <div><b>Formato:</b> ${c.w.toFixed(2)} × ${c.h.toFixed(2)} m ${c.tipo==='boxtruss_envelopado' ? '(envelopado)' : ''}</div>
         <div><b>Iluminação:</b> ${c.iluminacaoQtd > 0 ? c.iluminacaoQtd + ' Ribalta(s) LED' : 'não'}</div>
+        <div><b>Locação:</b> 2 dias</div>
         ${c.foraHorario ? `<div><b>Extra fora do horário:</b> ${moeda(c.extraForaHorario)}</div>` : ''}
       `;
       $('pdfTabela').innerHTML = `
         <tr><td><b>Estrutura</b></td><td style="text-align:right">${moeda(c.estruturaCusto)}</td></tr>
-        <tr><td><b>Banner${c.duplaFace ? ' (dupla face)' : ''}</b></td><td style="text-align:right">${moeda(c.bannerCusto)}</td></tr>
+        <tr><td><b>Banner</b></td><td style="text-align:right">${moeda(c.bannerCusto)}</td></tr>
         <tr><td><b>Iluminação</b></td><td style="text-align:right">${moeda(c.iluminacaoCusto)}</td></tr>
         ${c.foraHorario ? `<tr><td><b>Extra</b></td><td style="text-align:right">${moeda(c.extraForaHorario)}</td></tr>` : ''}
         <tr><td><b>Subtotal</b></td><td style="text-align:right">${moeda(c.subtotal)}</td></tr>
@@ -332,7 +319,7 @@ Condições de pagamento: Pix, depósito, boleto (sujeito à aprovação), cart�
     function update(){ render(); }
 
     // Eventos
-    ['tipo','largura','altura','dias','iluminacaoQtd','duplaFace','foraHorario','bannerM2','bannerM2Env','boxtrussML','metalonML','iluminacaoUnit','duplaFaceMult','impostosPct','extraForaHorarioValor']
+    ['tipo','largura','altura','iluminacaoQtd','foraHorario','bannerM2','bannerM2Env','boxtrussML','metalonML','iluminacaoUnit','impostosPct','extraForaHorarioValor']
       .forEach(id => $(id).addEventListener('input', update));
 
     function gerarPDF(){
