@@ -17,6 +17,7 @@
     .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
     label{font-size:13px;margin-bottom:6px;display:block}
     input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#111114;color:var(--text)}
+    input[type="checkbox"]{width:auto}
     .grid{display:grid;gap:12px}
     .cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
     .cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
@@ -28,6 +29,7 @@
     .list{list-style:none;padding:0;margin:0;display:grid;gap:6px}
     .k{font-size:13px}
     .val{font-weight:700}
+    .copy-feedback{min-height:16px;margin-top:6px;color:var(--accent);font-size:12px}
     hr{border:none;border-top:1px solid var(--line);margin:12px 0}
     .tiny{font-size:11px;color:var(--muted)}
     @media (max-width:760px){ .cols-2,.cols-3{grid-template-columns:1fr} header{flex-direction:column;align-items:flex-start} }
@@ -75,7 +77,6 @@
         </div>
         <div id="exemploLabel" class="tiny"></div>
 
-        <!-- Tamanhos rápidos -->
         <div>
           <div style="font-weight:600;font-size:13px;margin-bottom:6px">Tamanhos rápidos</div>
           <div class="grid cols-3">
@@ -153,12 +154,17 @@
     </section>
 
     <section class="card" id="texto-cliente">
-      <h2 style="margin:0 0 8px 0;font-size:18px">Texto rápido para enviar ao cliente</h2>
-      <div class="muted k" style="margin-bottom:6px">Copie e cole no WhatsApp/E-mail. (Edite local/agenda conforme necessário.)</div>
+      <div class="row" style="justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px">
+        <div>
+          <h2 style="margin:0 0 8px 0;font-size:18px">Texto rápido para enviar ao cliente</h2>
+          <div class="muted k">Copie e cole no WhatsApp/E-mail. (Edite local/agenda conforme necessário.)</div>
+        </div>
+        <button class="btn btn-accent no-print" onclick="copiarTextoCliente()">Copiar texto</button>
+      </div>
       <textarea id="texto" rows="12" readonly></textarea>
+      <div id="copyStatus" class="copy-feedback" aria-live="polite"></div>
     </section>
 
-    <!-- Área invisível usada na impressão/PDF -->
     <div id="printArea" class="print-block">
       <div style="padding:24px;color:#111">
         <h1 style="margin:0 0 8px 0;font-size:22px">Proposta de Locação — Backdrop & Boxtruss</h1>
@@ -182,7 +188,6 @@
   </div>
 
   <script>
-    // Helpers
     const $ = (id) => document.getElementById(id);
     const moeda = (v) => v.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
     const num = (el) => { const n = parseFloat(el.value.replace(',', '.')); return isFinite(n) ? Math.max(0, n) : 0; };
@@ -207,7 +212,7 @@
       const tipo = $('tipo').value;
       const w = num($('largura'));
       const h = num($('altura'));
-      const dias = 2; // Fixo em 2 dias
+      const dias = 2;
       const iluminacaoQtd = Math.max(0, parseInt($('iluminacaoQtd').value || '0', 10));
       const foraHorario = $('foraHorario').checked;
 
@@ -255,7 +260,6 @@
       const c = calcular();
       $('exemploLabel').textContent = exemploLabel();
 
-      // Resumo técnico
       $('resumo').innerHTML = `
         <li>Perímetro estrutural: <b class="val">${c.perimetro.toFixed(2)} m</b></li>
         <li>Lona (cálculo): <b class="val">${c.lonaW.toFixed(2)} m</b> × <b class="val">${c.lonaH.toFixed(2)} m</b> = <b class="val">${c.bannerArea.toFixed(2)} m²</b></li>
@@ -265,7 +269,6 @@
         ${c.foraHorario ? `<li>Extra fora do horário: <b class="val">${moeda(c.extraForaHorario)}</b></li>` : ''}
       `;
 
-      // Valores para proposta
       $('valores').innerHTML = `
         <div class="row" style="justify-content:space-between"><span>Subtotal</span><span class="val">${moeda(c.subtotal)}</span></div>
         <div class="row" style="justify-content:space-between"><span>Impostos NF (${(c.impostosPct*100).toFixed(0)}%)</span><span class="val">${moeda(c.impostos)}</span></div>
@@ -273,7 +276,6 @@
         <div class="row" style="justify-content:space-between;font-size:18px"><span>Total</span><span class="val">${moeda(c.total)}</span></div>
       `;
 
-      // Texto para WhatsApp/E-mail
       $('texto').value =
 `LOCAÇÃO ${c.tipo === 'metalon' ? 'DE PAINEL BACKDROP (METALON)' : 'DE ESTRUTURA BOXTRUSS'}
 
@@ -297,7 +299,6 @@ Observação: Serviços realizados fora do horário comercial, aos finais de sem
 
 Condições de pagamento: Pix, depósito, boleto (sujeito à aprovação), cartão (taxas), e cripto.`;
 
-      // Preparar conteúdo do PDF
       $('pdfInfo').innerHTML = `
         <div><b>Tipo:</b> ${c.tipo === 'metalon' ? 'Backdrop (Metalon tipo caixa)' : (c.tipo === 'boxtruss_envelopado' ? 'Boxtruss envelopado' : 'Boxtruss aparente')}</div>
         <div><b>Formato:</b> ${c.w.toFixed(2)} × ${c.h.toFixed(2)} m ${c.tipo==='boxtruss_envelopado' ? '(envelopado)' : ''}</div>
@@ -316,18 +317,46 @@ Condições de pagamento: Pix, depósito, boleto (sujeito à aprovação), cart�
       `;
     }
 
+    function copiarTextoCliente(){
+      const texto = $('texto');
+      const status = $('copyStatus');
+
+      function mostrarStatus(mensagem){
+        status.textContent = mensagem;
+        window.clearTimeout(copiarTextoCliente.timeoutId);
+        copiarTextoCliente.timeoutId = window.setTimeout(() => {
+          status.textContent = '';
+        }, 2500);
+      }
+
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(texto.value)
+          .then(() => mostrarStatus('Texto copiado para a área de transferência.'))
+          .catch(() => mostrarStatus('Não foi possível copiar automaticamente. Selecione o texto e copie manualmente.'));
+        return;
+      }
+
+      texto.focus();
+      texto.select();
+      texto.setSelectionRange(0, texto.value.length);
+
+      try {
+        const copiado = document.execCommand('copy');
+        mostrarStatus(copiado ? 'Texto copiado para a área de transferência.' : 'Selecione o texto e copie manualmente.');
+      } catch (error) {
+        mostrarStatus('Selecione o texto e copie manualmente.');
+      }
+    }
+
     function update(){ render(); }
 
-    // Eventos
     ['tipo','largura','altura','iluminacaoQtd','foraHorario','bannerM2','bannerM2Env','boxtrussML','metalonML','iluminacaoUnit','impostosPct','extraForaHorarioValor']
       .forEach(id => $(id).addEventListener('input', update));
 
     function gerarPDF(){
-      // Abre a janela de impressão
       window.print();
     }
 
-    // Inicializa
     update();
   </script>
 </body>
