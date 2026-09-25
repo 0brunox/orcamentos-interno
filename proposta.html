@@ -95,16 +95,14 @@
     .nota h2 { font-size: 16px; }
     .nota p + p { margin-top: 8px; }
     .lista { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
-    .lista li { position: relative; padding-left: 16px; }
+    .lista li { position: relative; padding-left: 22px; }
     .lista li::before {
-      content: "";
+      content: "✓";
       position: absolute;
       left: 0;
-      top: 0.55em;
-      width: 7px;
-      height: 7px;
-      border-radius: 99px;
-      background: var(--accent);
+      top: 0;
+      color: var(--accent);
+      font-weight: 700;
     }
     .rodape { margin-top: 22px; color: var(--muted); font-size: 13px; }
     .vazio { max-width: 62ch; }
@@ -425,11 +423,12 @@
         });
 
         const incluso = el('section', { class: 'nota' },
-          el('h2', { text: 'Incluso em todas as opções' }),
+          el('h2', { text: 'O que está incluso' }),
           el('ul', { class: 'lista' },
             el('li', { text: 'Locação da estrutura' }),
             el('li', { text: 'Impressão digital em lona fosca' }),
-            el('li', { text: 'Instalação e retirada' })
+            el('li', { text: 'Montagem e desmontagem' }),
+            el('li', { text: 'Impressão em alta resolução' })
           )
         );
         const condicoes = el('section', { class: 'nota' },
