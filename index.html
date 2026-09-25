@@ -44,7 +44,7 @@
         <h1>Calculadora de Locação — Backdrop & Boxtruss</h1>
         <div class="muted k">Válido para serviços no município do Rio de Janeiro – RJ</div>
       </div>
-      <div class="muted k">vHTML/JS 1.1</div>
+      <div class="muted k">vHTML/JS 1.2</div>
     </header>
 
     <div class="row no-print" style="gap:10px;flex-wrap:wrap">
@@ -61,6 +61,7 @@
           <select id="tipo">
             <option value="boxtruss_aparente">Boxtruss com Estrutura Aparente</option>
             <option value="boxtruss_envelopado">Boxtruss Envelopado (lona +40cm x +20cm)</option>
+            <option value="boxtruss_envelopado_parcial">Boxtruss Envelopado (parcial) (lona +20cm x +20cm)</option>
             <option value="metalon">Backdrop em Metalon (tipo caixa)</option>
           </select>
         </div>
@@ -120,6 +121,10 @@
           <div>
             <label>Banner Envelopado (R$/m²)</label>
             <input id="bannerM2Env" type="number" step="0.01" value="60">
+          </div>
+          <div>
+            <label>Banner Envelopado Parcial (R$/m²)</label>
+            <input id="bannerM2EnvParcial" type="number" step="0.01" value="70">
           </div>
           <div>
             <label>Estrutura Boxtruss (R$/m)</label>
@@ -183,7 +188,7 @@
     </div>
 
     <footer class="tiny">
-      Regras: estrutura por metro linear; banner por m²; para painéis envelopados, a lona considera +40cm na largura e +20cm na altura; locação padrão de 2 dias; extra fixo de R$ 300 quando houver montagem ou desmontagem fora do horário comercial; impostos NF listados separadamente.
+      Regras: estrutura por metro linear; banner por m²; envelopado: lona +40cm na largura e +20cm na altura; envelopado parcial: lona +20cm na largura e +20cm na altura; locação padrão de 2 dias; extra fixo de R$ 300 quando houver montagem ou desmontagem fora do horário comercial; impostos NF listados separadamente.
     </footer>
   </div>
 
@@ -204,6 +209,7 @@
       const h = num($('altura'));
       if (tipo==='boxtruss_aparente' && w===4 && h===3) return '(Ex.: 4,00 × 3,00 m – ref. Proposta #137910)';
       if (tipo==='boxtruss_envelopado' && Math.abs(w-2.6)<1e-9 && Math.abs(h-2.3)<1e-9) return '(Ex.: 2,60 × 2,30 m envelopado – ref. #137906)';
+      if (tipo==='boxtruss_envelopado_parcial' && Math.abs(w-2.3)<1e-9 && Math.abs(h-2.3)<1e-9) return '(Ex.: 2,30 × 2,30 m parcial – lona 2,50 × 2,50 m)';
       if (tipo==='metalon' && Math.abs(w-2.5)<1e-9 && Math.abs(h-2.3)<1e-9) return '(Ex.: 2,50 × 2,30 m metalon – ref. #137900/#137895)';
       return '';
     }
@@ -218,6 +224,7 @@
 
       const bannerM2 = num($('bannerM2'));
       const bannerM2Env = num($('bannerM2Env'));
+      const bannerM2EnvParcial = num($('bannerM2EnvParcial'));
       const boxtrussML = num($('boxtrussML'));
       const metalonML = num($('metalonML'));
       const iluminacaoUnit = num($('iluminacaoUnit'));
@@ -227,11 +234,12 @@
       const perimetro = 2*(w+h);
 
       const isEnv = (tipo==='boxtruss_envelopado');
-      const lonaW = isEnv ? w + 0.4 : w;
-      const lonaH = isEnv ? h + 0.2 : h;
+      const isEnvParcial = (tipo==='boxtruss_envelopado_parcial');
+      const lonaW = isEnv ? w + 0.4 : (isEnvParcial ? w + 0.2 : w);
+      const lonaH = (isEnv || isEnvParcial) ? h + 0.2 : h;
 
       const estruturaML = (tipo==='metalon') ? metalonML : boxtrussML;
-      const bannerM2Rate = isEnv ? bannerM2Env : bannerM2;
+      const bannerM2Rate = isEnv ? bannerM2Env : (isEnvParcial ? bannerM2EnvParcial : bannerM2);
 
       const bannerArea = lonaW * lonaH;
       const bannerCusto = bannerArea * bannerM2Rate;
@@ -279,7 +287,7 @@
       $('texto').value =
 `LOCAÇÃO ${c.tipo === 'metalon' ? 'DE PAINEL BACKDROP (METALON)' : 'DE ESTRUTURA BOXTRUSS'}
 
-Formato: ${c.w.toFixed(2)} x ${c.h.toFixed(2)} m${c.tipo==='boxtruss_envelopado' ? ' (painel envelopado)' : ''}
+Formato: ${c.w.toFixed(2)} x ${c.h.toFixed(2)} m${c.tipo==='boxtruss_envelopado' ? ' (painel envelopado)' : (c.tipo==='boxtruss_envelopado_parcial' ? ' (painel envelopado parcial)' : '')}
 Iluminação: ${c.iluminacaoQtd > 0 ? c.iluminacaoQtd + ' Ribalta(s) LED' : 'não'}
 Locação: 2 dias${c.foraHorario ? `
 Extra: Montagem/Desmontagem fora do horário – ${moeda(c.extraForaHorario)}` : ''}
@@ -300,8 +308,8 @@ Observação: Serviços realizados fora do horário comercial, aos finais de sem
 Condições de pagamento: Pix, depósito, boleto (sujeito à aprovação), cartão (taxas), e cripto.`;
 
       $('pdfInfo').innerHTML = `
-        <div><b>Tipo:</b> ${c.tipo === 'metalon' ? 'Backdrop (Metalon tipo caixa)' : (c.tipo === 'boxtruss_envelopado' ? 'Boxtruss envelopado' : 'Boxtruss aparente')}</div>
-        <div><b>Formato:</b> ${c.w.toFixed(2)} × ${c.h.toFixed(2)} m ${c.tipo==='boxtruss_envelopado' ? '(envelopado)' : ''}</div>
+        <div><b>Tipo:</b> ${c.tipo === 'metalon' ? 'Backdrop (Metalon tipo caixa)' : (c.tipo === 'boxtruss_envelopado' ? 'Boxtruss envelopado' : (c.tipo === 'boxtruss_envelopado_parcial' ? 'Boxtruss envelopado (parcial)' : 'Boxtruss aparente'))}</div>
+        <div><b>Formato:</b> ${c.w.toFixed(2)} × ${c.h.toFixed(2)} m ${c.tipo==='boxtruss_envelopado' ? '(envelopado)' : (c.tipo==='boxtruss_envelopado_parcial' ? '(envelopado parcial)' : '')}</div>
         <div><b>Iluminação:</b> ${c.iluminacaoQtd > 0 ? c.iluminacaoQtd + ' Ribalta(s) LED' : 'não'}</div>
         <div><b>Locação:</b> 2 dias</div>
         ${c.foraHorario ? `<div><b>Extra fora do horário:</b> ${moeda(c.extraForaHorario)}</div>` : ''}
@@ -350,7 +358,7 @@ Condições de pagamento: Pix, depósito, boleto (sujeito à aprovação), cart�
 
     function update(){ render(); }
 
-    ['tipo','largura','altura','iluminacaoQtd','foraHorario','bannerM2','bannerM2Env','boxtrussML','metalonML','iluminacaoUnit','impostosPct','extraForaHorarioValor']
+    ['tipo','largura','altura','iluminacaoQtd','foraHorario','bannerM2','bannerM2Env','bannerM2EnvParcial','boxtrussML','metalonML','iluminacaoUnit','impostosPct','extraForaHorarioValor']
       .forEach(id => $(id).addEventListener('input', update));
 
     function gerarPDF(){
