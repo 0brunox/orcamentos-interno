@@ -433,9 +433,9 @@
         );
         const condicoes = el('section', { class: 'nota' },
           el('h2', { text: 'Condições' }),
-          el('p', { text: 'Serviços fora do horário comercial, aos finais de semana ou em feriados podem ter taxa adicional. Quando essa taxa existe, ela aparece discriminada nesta proposta.' }),
-          el('p', { text: 'Pagamento por Pix, depósito bancário, boleto sujeito a aprovação, cartão de crédito com as taxas da operadora, e cripto.' }),
-          el('p', { text: 'Valores para serviço no município do Rio de Janeiro. Para outras cidades, o frete é à parte.' })
+          el('p', { text: 'Valores para serviços no município do Rio de Janeiro. Para outras cidades, o frete é calculado à parte.' }),
+          el('p', { text: 'Serviços fora do horário comercial, aos finais de semana ou feriados podem ter taxa adicional, informada previamente na proposta.' }),
+          el('p', { text: 'Pagamento via Pix, depósito bancário, boleto sujeito à aprovação, cartão de crédito ou cripto.' })
         );
 
         const emissao = dataLonga(data.emissao);
