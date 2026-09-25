@@ -73,8 +73,8 @@
           <label>Tipo</label>
           <select id="tipo">
             <option value="boxtruss_aparente">Boxtruss com Estrutura Aparente</option>
-            <option value="boxtruss_envelopado">Boxtruss Envelopado (lona +40cm x +20cm)</option>
             <option value="boxtruss_envelopado_parcial">Boxtruss Envelopado (parcial) (lona +20cm x +20cm)</option>
+            <option value="boxtruss_envelopado">Boxtruss Envelopado (lona +40cm x +20cm)</option>
             <option value="metalon">Backdrop em Metalon (tipo caixa)</option>
           </select>
         </div>
@@ -173,7 +173,7 @@
 
     <section class="card no-print" id="link-cliente">
       <h2 style="margin:0 0 8px 0;font-size:18px">Link para o cliente</h2>
-      <div class="muted k">O cliente abre no celular e vê as quatro opções, com foto e valor. A tabela de custos não entra no link. A de menor valor leva o selo de opção mais econômica.</div>
+      <div class="muted k">O cliente abre no celular e vê as quatro opções, com foto e valor, do mais econômico ao visual premium. A tabela de custos não entra no link.</div>
 
       <div class="grid cols-3" style="margin-top:12px">
         <div>
@@ -261,7 +261,7 @@
     }
 
     const PROPOSTA_URL = 'https://0brunox.github.io/orcamentos-interno/proposta.html';
-    const ORDEM_TIPOS = ['boxtruss_aparente', 'boxtruss_envelopado', 'boxtruss_envelopado_parcial', 'metalon'];
+    const ORDEM_TIPOS = ['boxtruss_aparente', 'boxtruss_envelopado_parcial', 'boxtruss_envelopado', 'metalon'];
     const NOME_TIPO = {
       boxtruss_aparente: 'Boxtruss com estrutura aparente',
       boxtruss_envelopado: 'Boxtruss envelopado',

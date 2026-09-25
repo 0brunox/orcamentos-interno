@@ -76,16 +76,19 @@
     .foto { display: block; width: 100%; padding: 0; border: 0; background: #e7e4de; cursor: zoom-in; }
     .foto img { display: block; width: 100%; height: 250px; object-fit: contain; }
     .miolo { padding: 16px 16px 18px; display: grid; gap: 8px; }
-    .selo {
+    .selo, .patamar {
       justify-self: start;
       margin: 0;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .selo {
       background: var(--accent);
       color: white;
       border-radius: 999px;
       padding: 4px 10px;
-      font-size: 12px;
-      font-weight: 700;
     }
+    .patamar { color: var(--accent); }
     h3 { margin: 0; font-size: 20px; letter-spacing: -0.02em; }
     .resumo { margin: 0; font-weight: 600; }
     .detalhe, .quebra, .aviso, .nota p { margin: 0; color: var(--muted); }
@@ -161,30 +164,34 @@
       const OPCOES = {
         boxtruss_aparente: {
           nome: 'Boxtruss com estrutura aparente',
+          patamar: 'Mais econômico',
           resumo: 'A opção mais econômica para eventos.',
           detalhe: 'A lona cobre a frente e a estrutura de alumínio fica visível nas bordas.',
           img: 'mockups/boxtruss-aparente.jpg'
         },
-        boxtruss_envelopado: {
-          nome: 'Boxtruss envelopado',
-          resumo: 'Lona cobre a frente e as laterais, deixando a estrutura totalmente escondida.',
-          detalhe: 'Acabamento mais sofisticado e uniforme. A lona envolve todo o painel e esconde completamente a treliça',
-          img: 'mockups/boxtruss-envelopado.jpg'
-        },
         boxtruss_envelopado_parcial: {
           nome: 'Boxtruss envelopado parcial',
+          patamar: 'Ótimo custo-benefício',
           resumo: 'Frente totalmente revestida, com a estrutura discretamente aparente nas laterais.',
           detalhe: '',
           img: 'mockups/boxtruss-envelopado-parcial.jpg'
         },
+        boxtruss_envelopado: {
+          nome: 'Boxtruss envelopado',
+          patamar: 'Acabamento mais sofisticado',
+          resumo: 'Lona cobre a frente e as laterais, deixando a estrutura totalmente escondida.',
+          detalhe: 'Acabamento mais sofisticado e uniforme. A lona envolve todo o painel e esconde completamente a treliça',
+          img: 'mockups/boxtruss-envelopado.jpg'
+        },
         metalon: {
           nome: 'Backdrop em metalon',
+          patamar: 'Visual premium',
           resumo: 'Painel fechado, tipo caixa, com profundidade e sem treliça.',
           detalhe: 'Estrutura em metalon, fechada como uma caixa. A face é lisa e o painel tem volume.',
           img: 'mockups/backdrop-metalon.jpg'
         }
       };
-      const ORDEM = ['boxtruss_aparente', 'boxtruss_envelopado', 'boxtruss_envelopado_parcial', 'metalon'];
+      const ORDEM = ['boxtruss_aparente', 'boxtruss_envelopado_parcial', 'boxtruss_envelopado', 'metalon'];
 
       const app = document.getElementById('app');
       let ops = [];
@@ -380,7 +387,6 @@
 
       function render(data) {
         ops = data.ops;
-        const base = data.ops.reduce((menor, op) => op.tot < menor.tot ? op : menor);
         document.title = data.cliente ? 'Proposta para ' + data.cliente : 'Proposta de locação';
 
         const imprimir = el('button', { class: 'btn no-print', type: 'button', text: 'Imprimir ou salvar PDF' });
@@ -399,7 +405,6 @@
 
         const grade = el('div', { class: 'grade' });
         data.ops.forEach((op, indice) => {
-          const economica = op.id === base.id;
           const foto = el('button', { class: 'foto', type: 'button', 'aria-label': 'Ampliar foto: ' + op.info.nome });
           foto.append(el('img', { src: op.info.img, alt: op.info.detalhe || op.info.resumo }));
           foto.addEventListener('click', () => abrirFoto(indice, foto));
@@ -409,10 +414,10 @@
           const quebra = op.imp >= 0
             ? 'Subtotal ' + moeda(op.sub) + ' · Impostos NF' + pct + ' ' + moeda(op.imp)
             : '';
-          grade.append(el('article', { class: economica ? 'card economica' : 'card' },
+          grade.append(el('article', { class: op.id === 'boxtruss_aparente' ? 'card economica' : 'card' },
             foto,
             el('div', { class: 'miolo' },
-              economica ? el('p', { class: 'selo', text: 'Opção mais econômica' }) : null,
+              el('p', { class: op.id === 'boxtruss_aparente' ? 'selo' : 'patamar', text: op.info.patamar }),
               el('h3', { text: op.info.nome }),
               el('p', { class: 'resumo', text: op.info.resumo }),
               op.info.detalhe ? el('p', { class: 'detalhe', text: op.info.detalhe }) : null,
