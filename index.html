@@ -35,6 +35,7 @@
     @media (max-width:760px){ .cols-2,.cols-3{grid-template-columns:1fr} header{flex-direction:column;align-items:flex-start} }
     @media print { .no-print{display:none} .print-block{display:block} body{background:#fff;color:#000} .card{border:none} }
     .print-block{display:none}
+    .mockup{width:100%;max-height:420px;object-fit:contain;border-radius:12px;background:#0e0e10;display:block}
   </style>
 </head>
 <body>
@@ -44,13 +45,21 @@
         <h1>Calculadora de Locação — Backdrop & Boxtruss</h1>
         <div class="muted k">Válido para serviços no município do Rio de Janeiro – RJ</div>
       </div>
-      <div class="muted k">vHTML/JS 1.2</div>
+      <div class="muted k">vHTML/JS 1.3</div>
     </header>
 
     <div class="row no-print" style="gap:10px;flex-wrap:wrap">
       <button class="btn" onclick="document.getElementById('texto-cliente').scrollIntoView({behavior:'smooth'})">Ir para Texto do Cliente</button>
       <button class="btn btn-accent" onclick="gerarPDF()">Gerar PDF</button>
     </div>
+
+    <section class="card no-print">
+      <div class="row" style="justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px">
+        <h2 style="margin:0;font-size:18px">Visual sem arte</h2>
+        <div id="mockupCaption" class="muted k"></div>
+      </div>
+      <img id="mockup" class="mockup" alt="Mockup do tipo selecionado">
+    </section>
 
     <section class="grid cols-2">
       <div class="card grid" id="dados">
@@ -267,6 +276,17 @@
     function render(){
       const c = calcular();
       $('exemploLabel').textContent = exemploLabel();
+
+      const mockups = {
+        boxtruss_aparente: ['mockups/boxtruss-aparente.jpg', 'Boxtruss aparente: a treliça fica visível em volta do banner.'],
+        boxtruss_envelopado: ['mockups/boxtruss-envelopado.jpg', 'Envelopado: a lona cobre a frente e as laterais. A estrutura não aparece.'],
+        boxtruss_envelopado_parcial: ['mockups/boxtruss-envelopado-parcial.jpg', 'Envelopado parcial: a lona cobre a frente e a treliça aparece na lateral.'],
+        metalon: ['mockups/backdrop-metalon.jpg', 'Metalon tipo caixa: painel fechado, com profundidade, sem treliça.']
+      };
+      const mockup = mockups[c.tipo];
+      $('mockup').src = mockup[0];
+      $('mockup').alt = mockup[1];
+      $('mockupCaption').textContent = mockup[1];
 
       $('resumo').innerHTML = `
         <li>Perímetro estrutural: <b class="val">${c.perimetro.toFixed(2)} m</b></li>
