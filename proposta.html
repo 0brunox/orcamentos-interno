@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex" />
+  <title>Proposta de locação — Backdrop e boxtruss</title>
+  <meta name="description" content="Proposta de locação de backdrop e boxtruss, com foto e valor de cada estrutura." />
+  <meta property="og:title" content="Proposta de locação — Backdrop e boxtruss" />
+  <meta property="og:description" content="Veja as opções de estrutura, com foto e o valor de cada uma." />
+  <meta property="og:image" content="https://0brunox.github.io/orcamentos-interno/mockups/boxtruss-envelopado.jpg" />
+  <meta property="og:type" content="website" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%231c1b19'/%3E%3Crect x='6' y='9' width='20' height='13' fill='none' stroke='white' stroke-width='2'/%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg: #efeae3;
+      --paper: #fffcf8;
+      --ink: #1c1b19;
+      --muted: #5c574e;
+      --line: #e3ddd3;
+      --accent: #145c48;
+      --soft: #e7f3ee;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+    .pagina { max-width: 1080px; margin: 0 auto; padding: 28px 20px 72px; }
+    .topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+    .kicker {
+      margin: 0 0 6px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    h1 { margin: 0; font-size: clamp(28px, 4vw, 40px); letter-spacing: -0.03em; line-height: 1.1; }
+    .lede { margin: 12px 0 0; max-width: 62ch; color: var(--muted); }
+    .btn {
+      border: 1px solid var(--line);
+      background: var(--paper);
+      color: var(--ink);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font: inherit;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .btn:focus-visible, .foto:focus-visible, .luz button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+    .fatos {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+      gap: 14px 22px;
+      margin: 22px 0 28px;
+      padding: 16px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    .fatos .rotulo { margin: 0 0 2px; font-size: 12px; color: var(--muted); }
+    .fatos .valor { margin: 0; font-weight: 600; }
+    h2 { margin: 0 0 12px; font-size: 20px; letter-spacing: -0.02em; }
+    .grade { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(50, 36, 14, 0.05);
+    }
+    .card.indicada { border-color: var(--accent); box-shadow: 0 10px 30px rgba(20, 92, 72, 0.12); }
+    .foto { display: block; width: 100%; padding: 0; border: 0; background: #e7e4de; cursor: zoom-in; }
+    .foto img { display: block; width: 100%; height: 250px; object-fit: contain; }
+    .miolo { padding: 16px 16px 18px; display: grid; gap: 8px; }
+    .selo {
+      justify-self: start;
+      margin: 0;
+      background: var(--accent);
+      color: white;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+    h3 { margin: 0; font-size: 20px; letter-spacing: -0.02em; }
+    .resumo { margin: 0; font-weight: 600; }
+    .detalhe, .quebra, .delta, .aviso, .nota p { margin: 0; color: var(--muted); }
+    .preco { margin: 4px 0 0; font-size: 28px; font-weight: 700; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+    .notas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    .nota { background: var(--paper); border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px; }
+    .nota h2 { font-size: 16px; }
+    .nota p + p { margin-top: 8px; }
+    .lista { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+    .lista li { position: relative; padding-left: 16px; }
+    .lista li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.55em;
+      width: 7px;
+      height: 7px;
+      border-radius: 99px;
+      background: var(--accent);
+    }
+    .rodape { margin-top: 22px; color: var(--muted); font-size: 13px; }
+    .vazio { max-width: 62ch; }
+    .luz {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      background: #141210;
+      color: white;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+      padding:
+        max(16px, env(safe-area-inset-top))
+        max(16px, env(safe-area-inset-right))
+        max(16px, env(safe-area-inset-bottom))
+        max(16px, env(safe-area-inset-left));
+    }
+    .luz-topo, .luz-nav { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .luz figure { margin: 0; display: grid; align-content: center; justify-items: center; gap: 10px; min-height: 0; }
+    .luz img { max-width: min(1100px, 100%); max-height: calc(100vh - 170px); object-fit: contain; }
+    .luz figcaption { text-align: center; }
+    .luz button, .luz-nav span {
+      background: transparent;
+      color: white;
+      border: 1px solid rgba(255,255,255,.4);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font: inherit;
+      cursor: pointer;
+    }
+    .luz-nav span { border: 0; }
+    @media (max-width: 760px) {
+      .grade, .notas { grid-template-columns: 1fr; }
+      .foto img { height: 220px; }
+      .topo { flex-direction: column; }
+    }
+    @media print {
+      body { background: white; }
+      .no-print { display: none !important; }
+      .pagina { padding: 0; }
+      .card, .nota { box-shadow: none; break-inside: avoid; }
+      .foto { cursor: default; }
+    }
+  </style>
+</head>
+<body>
+  <main class="pagina" id="app">
+    <p class="aviso">Abrindo a proposta…</p>
+  </main>
+  <noscript>
+    <p class="pagina">Para ver a proposta, abra este link em um navegador com JavaScript ligado.</p>
+  </noscript>
+  <script>
+    (function () {
+      const OPCOES = {
+        boxtruss_aparente: {
+          nome: 'Boxtruss com estrutura aparente',
+          resumo: 'A treliça fica visível em volta do banner.',
+          detalhe: 'Visual clássico de evento: a estrutura de alumínio aparece nas bordas e a lona cobre a frente.',
+          img: 'mockups/boxtruss-aparente.jpg'
+        },
+        boxtruss_envelopado: {
+          nome: 'Boxtruss envelopado',
+          resumo: 'A lona cobre a frente e as laterais. A estrutura não aparece.',
+          detalhe: 'Acabamento liso, com profundidade. A lona impressa envolve o painel e esconde a treliça.',
+          img: 'mockups/boxtruss-envelopado.jpg'
+        },
+        boxtruss_envelopado_parcial: {
+          nome: 'Boxtruss envelopado parcial',
+          resumo: 'A lona cobre a frente. As bases de metal ficam aparentes embaixo.',
+          detalhe: 'A face do painel fica lisa. As bases da estrutura aparecem na parte inferior.',
+          img: 'mockups/boxtruss-envelopado-parcial.jpg'
+        },
+        metalon: {
+          nome: 'Backdrop em metalon',
+          resumo: 'Painel fechado, tipo caixa, com profundidade e sem treliça.',
+          detalhe: 'Estrutura em metalon, fechada como uma caixa. A face é lisa e o painel tem volume.',
+          img: 'mockups/backdrop-metalon.jpg'
+        }
+      };
+      const ORDEM = ['boxtruss_aparente', 'boxtruss_envelopado', 'boxtruss_envelopado_parcial', 'metalon'];
+
+      const app = document.getElementById('app');
+      let ops = [];
+      let fotoAberta = -1;
+      let origemFoto = null;
+
+      function el(tag, attrs) {
+        const node = document.createElement(tag);
+        const extras = attrs || {};
+        Object.keys(extras).forEach(chave => {
+          const valor = extras[chave];
+          if (chave === 'class') node.className = valor;
+          else if (chave === 'text') node.textContent = valor == null ? '' : String(valor);
+          else if (valor != null) node.setAttribute(chave, valor);
+        });
+        for (let i = 2; i < arguments.length; i++) {
+          if (arguments[i]) node.append(arguments[i]);
+        }
+        return node;
+      }
+
+      function moeda(v) {
+        return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      }
+
+      function metros(n) {
+        return Number(n).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+
+      function dataCurta(iso) {
+        const partes = String(iso).split('-');
+        if (partes.length !== 3 || partes.some(parte => !parte)) return '';
+        return partes[2] + '/' + partes[1] + '/' + partes[0];
+      }
+
+      function dataLonga(iso) {
+        const partes = String(iso).split('-');
+        if (partes.length !== 3) return '';
+        const data = new Date(Number(partes[0]), Number(partes[1]) - 1, Number(partes[2]));
+        if (Number.isNaN(data.getTime())) return '';
+        return data.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' });
+      }
+
+      function decodificar(s) {
+        const limpo = String(s || '').replace(/\s/g, '');
+        if (!/^[A-Za-z0-9\-_]+$/.test(limpo)) throw new Error('payload');
+        const falta = limpo.length % 4;
+        const pad = falta === 0 ? '' : '='.repeat(4 - falta);
+        const b64 = limpo.replace(/-/g, '+').replace(/_/g, '/') + pad;
+        const bin = atob(b64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        return JSON.parse(new TextDecoder().decode(bytes));
+      }
+
+      function validar(data) {
+        if (!data || data.v !== 1 || !Array.isArray(data.o)) return null;
+        const w = Number(data.w);
+        const h = Number(data.h);
+        if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0 || w > 100 || h > 100) return null;
+        const vistos = {};
+        const lista = [];
+        data.o.forEach(item => {
+          if (!Array.isArray(item) || item.length < 3) return;
+          const id = item[0];
+          const sub = Number(item[1]);
+          const tot = Number(item[2]);
+          if (!OPCOES[id] || vistos[id]) return;
+          if (!Number.isFinite(sub) || !Number.isFinite(tot) || sub < 0 || tot < 0 || tot > 10000000) return;
+          vistos[id] = true;
+          const imp = Math.round((tot - sub) * 100) / 100;
+          lista.push({ id, sub, tot, imp, info: OPCOES[id] });
+        });
+        if (!lista.length) return null;
+        lista.sort((a, b) => ORDEM.indexOf(a.id) - ORDEM.indexOf(b.id));
+        const sugerida = typeof data.s === 'string' && OPCOES[data.s] ? data.s : '';
+        if (sugerida) {
+          lista.sort((a, b) => (a.id === sugerida ? -1 : b.id === sugerida ? 1 : 0));
+        }
+        const pct = Number(data.p);
+        const extra = Number(data.x);
+        return {
+          cliente: typeof data.c === 'string' ? data.c.trim().slice(0, 80) : '',
+          evento: typeof data.e === 'string' ? data.e.trim().slice(0, 120) : '',
+          w, h,
+          luz: Math.min(999, Math.max(0, parseInt(data.l, 10) || 0)),
+          extra: Number.isFinite(extra) && extra > 0 ? Math.min(extra, 1000000) : 0,
+          validade: typeof data.vd === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(data.vd) ? data.vd : '',
+          emissao: typeof data.em === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(data.em) ? data.em : '',
+          impostoPct: Number.isFinite(pct) && pct >= 0 && pct <= 100 ? pct : null,
+          sugerida,
+          ops: lista
+        };
+      }
+
+      function fato(rotulo, valor) {
+        if (!valor) return null;
+        return el('div', null, el('div', { class: 'rotulo', text: rotulo }), el('div', { class: 'valor', text: valor }));
+      }
+
+      function textoLuz(qtd) {
+        if (!qtd) return 'Sem iluminação';
+        if (qtd === 1) return '1 ribalta de LED';
+        return qtd + ' ribaltas de LED';
+      }
+
+      function textoDelta(op, base) {
+        if (!base || op.id === base.id) return '';
+        const delta = Math.round(op.tot * 100) - Math.round(base.tot * 100);
+        if (delta === 0) return 'Mesmo valor da opção indicada';
+        const valor = moeda(Math.abs(delta) / 100);
+        return delta > 0 ? valor + ' a mais que a opção indicada' : valor + ' a menos que a opção indicada';
+      }
+
+      function mostrarAviso(titulo, texto) {
+        app.replaceChildren(
+          el('section', { class: 'vazio' },
+            el('p', { class: 'kicker', text: 'Locação de backdrop e boxtruss' }),
+            el('h1', { text: titulo }),
+            el('p', { class: 'lede', text: texto })
+          )
+        );
+      }
+
+      function fecharFoto() {
+        const luz = document.getElementById('lightbox');
+        if (luz) luz.remove();
+        fotoAberta = -1;
+        document.body.style.overflow = '';
+        if (origemFoto) origemFoto.focus();
+      }
+
+      function desenharFoto() {
+        let luz = document.getElementById('lightbox');
+        if (!luz) {
+          luz = el('div', { class: 'luz', id: 'lightbox', role: 'dialog', 'aria-modal': 'true' });
+          document.body.append(luz);
+          document.body.style.overflow = 'hidden';
+          luz.addEventListener('click', evento => {
+            if (evento.target === luz) fecharFoto();
+          });
+          let toqueX = null;
+          luz.addEventListener('touchstart', evento => {
+            toqueX = evento.changedTouches[0].clientX;
+          }, { passive: true });
+          luz.addEventListener('touchend', evento => {
+            if (toqueX == null) return;
+            const dx = evento.changedTouches[0].clientX - toqueX;
+            if (dx > 50) passo(-1);
+            else if (dx < -50) passo(1);
+            toqueX = null;
+          }, { passive: true });
+        }
+        const op = ops[fotoAberta];
+        const fechar = el('button', { type: 'button', text: 'Fechar' });
+        fechar.addEventListener('click', fecharFoto);
+        const anterior = el('button', { type: 'button', text: 'Anterior' });
+        anterior.addEventListener('click', () => passo(-1));
+        const proxima = el('button', { type: 'button', text: 'Próxima' });
+        proxima.addEventListener('click', () => passo(1));
+        const img = el('img', { src: op.info.img, alt: op.info.resumo });
+        luz.replaceChildren(
+          el('div', { class: 'luz-topo' },
+            el('strong', { text: op.info.nome }),
+            fechar
+          ),
+          el('figure', null,
+            img,
+            el('figcaption', { text: op.info.resumo + ' Modelo sem arte impressa.' })
+          ),
+          el('div', { class: 'luz-nav' },
+            anterior,
+            el('span', { text: (fotoAberta + 1) + ' de ' + ops.length }),
+            proxima
+          )
+        );
+        fechar.focus();
+      }
+
+      function abrirFoto(indice, botao) {
+        origemFoto = botao;
+        fotoAberta = indice;
+        desenharFoto();
+      }
+
+      function passo(direcao) {
+        if (fotoAberta < 0) return;
+        fotoAberta = (fotoAberta + direcao + ops.length) % ops.length;
+        desenharFoto();
+      }
+
+      document.addEventListener('keydown', evento => {
+        if (fotoAberta < 0) return;
+        if (evento.key === 'Escape') fecharFoto();
+        if (evento.key === 'ArrowRight') {
+          evento.preventDefault();
+          passo(1);
+        }
+        if (evento.key === 'ArrowLeft') {
+          evento.preventDefault();
+          passo(-1);
+        }
+      });
+
+      function render(data) {
+        ops = data.ops;
+        const base = data.ops.find(op => op.id === data.sugerida) || null;
+        document.title = data.cliente ? 'Proposta para ' + data.cliente : 'Proposta de locação';
+
+        const imprimir = el('button', { class: 'btn no-print', type: 'button', text: 'Imprimir ou salvar PDF' });
+        imprimir.addEventListener('click', () => window.print());
+
+        const titulo = data.cliente ? 'Proposta para ' + data.cliente : 'Proposta de locação';
+        const fatos = el('div', { class: 'fatos' },
+          fato('Medidas', metros(data.w) + ' × ' + metros(data.h) + ' m'),
+          fato('Locação', '2 dias'),
+          fato('Iluminação', textoLuz(data.luz)),
+          fato('Evento', data.evento),
+          fato('Fora do horário', data.extra ? moeda(data.extra) + ' já incluído nos valores' : ''),
+          fato('Válida até', dataCurta(data.validade)),
+          fato('Local', 'Rio de Janeiro – RJ')
+        );
+
+        const grade = el('div', { class: 'grade' });
+        data.ops.forEach((op, indice) => {
+          const indicada = op.id === data.sugerida;
+          const foto = el('button', { class: 'foto', type: 'button', 'aria-label': 'Ampliar foto: ' + op.info.nome });
+          foto.append(el('img', { src: op.info.img, alt: op.info.resumo }));
+          foto.addEventListener('click', () => abrirFoto(indice, foto));
+          const pct = data.impostoPct == null
+            ? ''
+            : ' (' + data.impostoPct.toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + '%)';
+          const quebra = op.imp >= 0
+            ? 'Subtotal ' + moeda(op.sub) + ' · Impostos NF' + pct + ' ' + moeda(op.imp)
+            : '';
+          grade.append(el('article', { class: indicada ? 'card indicada' : 'card' },
+            foto,
+            el('div', { class: 'miolo' },
+              indicada ? el('p', { class: 'selo', text: 'Opção indicada' }) : null,
+              el('h3', { text: op.info.nome }),
+              el('p', { class: 'resumo', text: op.info.resumo }),
+              el('p', { class: 'detalhe', text: op.info.detalhe }),
+              el('p', { class: 'preco', text: moeda(op.tot) }),
+              quebra ? el('p', { class: 'quebra', text: quebra }) : null,
+              textoDelta(op, base) ? el('p', { class: 'delta', text: textoDelta(op, base) }) : null
+            )
+          ));
+        });
+
+        const incluso = el('section', { class: 'nota' },
+          el('h2', { text: 'Incluso em todas as opções' }),
+          el('ul', { class: 'lista' },
+            el('li', { text: 'Locação da estrutura' }),
+            el('li', { text: 'Impressão digital em lona fosca' }),
+            el('li', { text: 'Instalação e retirada' })
+          )
+        );
+        const condicoes = el('section', { class: 'nota' },
+          el('h2', { text: 'Condições' }),
+          el('p', { text: 'Serviços fora do horário comercial, aos finais de semana ou em feriados podem ter taxa adicional. Quando essa taxa existe, ela aparece discriminada nesta proposta.' }),
+          el('p', { text: 'Pagamento por Pix, depósito bancário, boleto sujeito a aprovação, cartão de crédito com as taxas da operadora, e cripto.' }),
+          el('p', { text: 'Valores para serviço no município do Rio de Janeiro. Para outras cidades, o frete é à parte.' })
+        );
+
+        const emissao = dataLonga(data.emissao);
+        app.replaceChildren(
+          el('header', { class: 'topo' },
+            el('div', null,
+              el('p', { class: 'kicker', text: 'Locação de backdrop e boxtruss' }),
+              el('h1', { text: titulo }),
+              el('p', { class: 'lede', text: 'As fotos são modelos sem arte. A impressão entra com a arte do seu evento. Toque em uma foto para ampliar e passar de uma estrutura para a outra.' })
+            ),
+            imprimir
+          ),
+          fatos,
+          el('h2', { text: 'Opções neste tamanho' }),
+          grade,
+          el('div', { class: 'notas' }, incluso, condicoes),
+          el('p', { class: 'rodape', text: emissao ? 'Proposta emitida em ' + emissao + '.' : '' })
+        );
+      }
+
+      try {
+        const bruto = new URLSearchParams(location.search).get('d');
+        if (!bruto) {
+          mostrarAviso('Link de proposta', 'Este endereço abre uma proposta pronta, com as fotos e os valores. Peça o link para quem está fazendo o orçamento.');
+          return;
+        }
+        const data = validar(decodificar(bruto));
+        if (!data) {
+          mostrarAviso('Não foi possível abrir esta proposta', 'O link parece incompleto. Peça para enviarem de novo.');
+          return;
+        }
+        render(data);
+      } catch (error) {
+        mostrarAviso('Não foi possível abrir esta proposta', 'O link parece incompleto. Peça para enviarem de novo.');
+      }
+    })();
+  </script>
+</body>
+</html>

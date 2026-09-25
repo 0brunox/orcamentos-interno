@@ -16,7 +16,7 @@
     .muted{color:var(--muted)}
     .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px}
     label{font-size:13px;margin-bottom:6px;display:block}
-    input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#111114;color:var(--text)}
+    input,select,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#111114;color:var(--text);color-scheme:dark}
     input[type="checkbox"]{width:auto}
     .grid{display:grid;gap:12px}
     .cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -36,6 +36,9 @@
     @media print { .no-print{display:none} .print-block{display:block} body{background:#fff;color:#000} .card{border:none} }
     .print-block{display:none}
     .mockup{width:100%;max-height:420px;object-fit:contain;border-radius:12px;background:#0e0e10;display:block}
+    .opt-row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+    .opt-row:last-child{border-bottom:none}
+    .opt-on{color:var(--accent)}
   </style>
 </head>
 <body>
@@ -45,12 +48,13 @@
         <h1>Calculadora de Locação — Backdrop & Boxtruss</h1>
         <div class="muted k">Válido para serviços no município do Rio de Janeiro – RJ</div>
       </div>
-      <div class="muted k">vHTML/JS 1.3</div>
+      <div class="muted k">vHTML/JS 1.4</div>
     </header>
 
     <div class="row no-print" style="gap:10px;flex-wrap:wrap">
-      <button class="btn" onclick="document.getElementById('texto-cliente').scrollIntoView({behavior:'smooth'})">Ir para Texto do Cliente</button>
-      <button class="btn btn-accent" onclick="gerarPDF()">Gerar PDF</button>
+      <button type="button" class="btn btn-accent" onclick="document.getElementById('link-cliente').scrollIntoView({behavior:'smooth'})">Link para o cliente</button>
+      <button type="button" class="btn" onclick="document.getElementById('texto-cliente').scrollIntoView({behavior:'smooth'})">Texto do cliente</button>
+      <button type="button" class="btn" onclick="gerarPDF()">Gerar PDF</button>
     </div>
 
     <section class="card no-print">
@@ -167,6 +171,39 @@
       </div>
     </section>
 
+    <section class="card no-print" id="link-cliente">
+      <h2 style="margin:0 0 8px 0;font-size:18px">Link para o cliente</h2>
+      <div class="muted k">O cliente abre no celular e vê as quatro opções, com foto e valor. A tabela de custos não entra no link. A opção escolhida em Tipo vai marcada como indicada.</div>
+
+      <div class="grid cols-3" style="margin-top:12px">
+        <div>
+          <label for="clienteNome">Cliente</label>
+          <input id="clienteNome" type="text" maxlength="80" placeholder="Nome de quem recebe" autocomplete="name">
+        </div>
+        <div>
+          <label for="clienteEvento">Evento</label>
+          <input id="clienteEvento" type="text" maxlength="120" placeholder="Aniversário, feira, casamento" autocomplete="off">
+        </div>
+        <div>
+          <label for="validade">Válida até</label>
+          <input id="validade" type="date">
+        </div>
+      </div>
+
+      <div style="font-weight:600;font-size:13px;margin:14px 0 4px">Valores das quatro opções neste tamanho</div>
+      <div id="comparativo"></div>
+
+      <label for="linkProposta" style="margin-top:12px">Link</label>
+      <input id="linkProposta" type="text" readonly spellcheck="false">
+      <div class="row" style="margin-top:10px;flex-wrap:wrap">
+        <button type="button" class="btn btn-accent" onclick="copiarLink()">Copiar link</button>
+        <button type="button" class="btn" onclick="abrirProposta()">Abrir como o cliente</button>
+        <button type="button" class="btn" onclick="enviarWhatsApp()">Abrir no WhatsApp</button>
+      </div>
+      <div id="linkStatus" class="copy-feedback" aria-live="polite"></div>
+      <div class="tiny">O valor fica gravado no link. Mudar a tabela depois não altera os links já enviados.</div>
+    </section>
+
     <section class="card" id="texto-cliente">
       <div class="row" style="justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px">
         <div>
@@ -175,7 +212,7 @@
         </div>
         <button class="btn btn-accent no-print" onclick="copiarTextoCliente()">Copiar texto</button>
       </div>
-      <textarea id="texto" rows="12" readonly></textarea>
+      <textarea id="texto" rows="14" readonly></textarea>
       <div id="copyStatus" class="copy-feedback" aria-live="polite"></div>
     </section>
 
@@ -223,54 +260,117 @@
       return '';
     }
 
-    function calcular(){
-      const tipo = $('tipo').value;
-      const w = num($('largura'));
-      const h = num($('altura'));
-      const dias = 2;
-      const iluminacaoQtd = Math.max(0, parseInt($('iluminacaoQtd').value || '0', 10));
-      const foraHorario = $('foraHorario').checked;
+    const PROPOSTA_URL = 'https://0brunox.github.io/orcamentos-interno/proposta.html';
+    const ORDEM_TIPOS = ['boxtruss_aparente', 'boxtruss_envelopado', 'boxtruss_envelopado_parcial', 'metalon'];
+    const NOME_TIPO = {
+      boxtruss_aparente: 'Boxtruss com estrutura aparente',
+      boxtruss_envelopado: 'Boxtruss envelopado',
+      boxtruss_envelopado_parcial: 'Boxtruss envelopado parcial',
+      metalon: 'Backdrop em metalon'
+    };
 
-      const bannerM2 = num($('bannerM2'));
-      const bannerM2Env = num($('bannerM2Env'));
-      const bannerM2EnvParcial = num($('bannerM2EnvParcial'));
-      const boxtrussML = num($('boxtrussML'));
-      const metalonML = num($('metalonML'));
-      const iluminacaoUnit = num($('iluminacaoUnit'));
-      const impostosPct = num($('impostosPct'))/100;
-      const extraForaHorarioValor = num($('extraForaHorarioValor'));
+    function dinheiro(v){
+      return Math.round((v + Number.EPSILON) * 100) / 100;
+    }
 
-      const perimetro = 2*(w+h);
+    function dataMaisDias(dias){
+      const d = new Date();
+      d.setDate(d.getDate() + dias);
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return d.getFullYear() + '-' + m + '-' + day;
+    }
 
-      const isEnv = (tipo==='boxtruss_envelopado');
-      const isEnvParcial = (tipo==='boxtruss_envelopado_parcial');
-      const lonaW = isEnv ? w + 0.4 : (isEnvParcial ? w + 0.2 : w);
-      const lonaH = (isEnv || isEnvParcial) ? h + 0.2 : h;
+    function formatarDataBR(iso){
+      const partes = String(iso || '').split('-');
+      if (partes.length !== 3 || partes.some(p => !p)) return '';
+      return partes[2] + '/' + partes[1] + '/' + partes[0];
+    }
 
-      const estruturaML = (tipo==='metalon') ? metalonML : boxtrussML;
-      const bannerM2Rate = isEnv ? bannerM2Env : (isEnvParcial ? bannerM2EnvParcial : bannerM2);
+    function entradas(){
+      return {
+        w: num($('largura')),
+        h: num($('altura')),
+        iluminacaoQtd: Math.max(0, parseInt($('iluminacaoQtd').value || '0', 10) || 0),
+        foraHorario: $('foraHorario').checked,
+        bannerM2: num($('bannerM2')),
+        bannerM2Env: num($('bannerM2Env')),
+        bannerM2EnvParcial: num($('bannerM2EnvParcial')),
+        boxtrussML: num($('boxtrussML')),
+        metalonML: num($('metalonML')),
+        iluminacaoUnit: num($('iluminacaoUnit')),
+        impostosPct: num($('impostosPct')) / 100,
+        extraForaHorarioValor: num($('extraForaHorarioValor'))
+      };
+    }
 
+    function precoTipo(tipo, e){
+      const perimetro = 2 * (e.w + e.h);
+      const isEnv = tipo === 'boxtruss_envelopado';
+      const isEnvParcial = tipo === 'boxtruss_envelopado_parcial';
+      const lonaW = isEnv ? e.w + 0.4 : (isEnvParcial ? e.w + 0.2 : e.w);
+      const lonaH = (isEnv || isEnvParcial) ? e.h + 0.2 : e.h;
+      const estruturaML = tipo === 'metalon' ? e.metalonML : e.boxtrussML;
+      const bannerM2Rate = isEnv ? e.bannerM2Env : (isEnvParcial ? e.bannerM2EnvParcial : e.bannerM2);
       const bannerArea = lonaW * lonaH;
       const bannerCusto = bannerArea * bannerM2Rate;
-
       const estruturaCusto = perimetro * estruturaML;
-      const iluminacaoCusto = iluminacaoQtd * iluminacaoUnit;
-
-      const baseServicos = estruturaCusto + bannerCusto + iluminacaoCusto;
-
-      const extraForaHorario = foraHorario ? extraForaHorarioValor : 0;
-
-      const subtotal = baseServicos + extraForaHorario;
-      const impostos = subtotal * impostosPct;
+      const iluminacaoCusto = e.iluminacaoQtd * e.iluminacaoUnit;
+      const extraForaHorario = e.foraHorario ? e.extraForaHorarioValor : 0;
+      const subtotal = estruturaCusto + bannerCusto + iluminacaoCusto + extraForaHorario;
+      const impostos = subtotal * e.impostosPct;
       const total = subtotal + impostos;
-
       return {
-        tipo, w, h, dias, iluminacaoQtd, foraHorario,
+        tipo, w: e.w, h: e.h, dias: 2, iluminacaoQtd: e.iluminacaoQtd, foraHorario: e.foraHorario,
         perimetro, lonaW, lonaH, bannerArea,
         estruturaCusto, bannerCusto, iluminacaoCusto,
         extraForaHorario, subtotal, impostos, total,
-        impostosPct
+        impostosPct: e.impostosPct
       };
+    }
+
+    function calcular(){
+      return precoTipo($('tipo').value, entradas());
+    }
+
+    function calcularTodas(){
+      const e = entradas();
+      return ORDEM_TIPOS.map(id => {
+        const p = precoTipo(id, e);
+        const subtotal = dinheiro(p.subtotal);
+        const impostos = dinheiro(p.impostos);
+        return { id, nome: NOME_TIPO[id], ...p, subtotal, impostos, total: dinheiro(subtotal + impostos) };
+      });
+    }
+
+    function encodePayload(obj){
+      const bytes = new TextEncoder().encode(JSON.stringify(obj));
+      let bin = '';
+      for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+    }
+
+    function montarLink(){
+      const atual = calcular();
+      const todas = calcularTodas();
+      const nome = $('clienteNome').value.trim().slice(0, 80);
+      const evento = $('clienteEvento').value.trim().slice(0, 120);
+      const validade = $('validade').value;
+      const payload = {
+        v: 1,
+        w: dinheiro(atual.w),
+        h: dinheiro(atual.h),
+        l: atual.iluminacaoQtd,
+        s: atual.tipo,
+        em: dataMaisDias(0),
+        p: dinheiro(atual.impostosPct * 100),
+        o: todas.map(t => [t.id, t.subtotal, t.total])
+      };
+      if (nome) payload.c = nome;
+      if (evento) payload.e = evento;
+      if (/^\d{4}-\d{2}-\d{2}$/.test(validade)) payload.vd = validade;
+      if (atual.foraHorario && atual.extraForaHorario > 0) payload.x = dinheiro(atual.extraForaHorario);
+      return PROPOSTA_URL + '?d=' + encodePayload(payload);
     }
 
     function render(){
@@ -297,13 +397,25 @@
         ${c.foraHorario ? `<li>Extra fora do horário: <b class="val">${moeda(c.extraForaHorario)}</b></li>` : ''}
       `;
 
+      const todas = calcularTodas();
+      const fechado = todas.find(t => t.id === c.tipo) || todas[0];
+      const link = montarLink();
+      $('linkProposta').value = link;
+      $('comparativo').innerHTML = todas.map(t => `
+        <div class="opt-row">
+          <span>${t.nome}${t.id === c.tipo ? ' <span class="opt-on">· indicada</span>' : ''}</span>
+          <span class="val">${moeda(t.total)}</span>
+        </div>
+      `).join('');
+
       $('valores').innerHTML = `
-        <div class="row" style="justify-content:space-between"><span>Subtotal</span><span class="val">${moeda(c.subtotal)}</span></div>
-        <div class="row" style="justify-content:space-between"><span>Impostos NF (${(c.impostosPct*100).toFixed(0)}%)</span><span class="val">${moeda(c.impostos)}</span></div>
+        <div class="row" style="justify-content:space-between"><span>Subtotal</span><span class="val">${moeda(fechado.subtotal)}</span></div>
+        <div class="row" style="justify-content:space-between"><span>Impostos NF (${(c.impostosPct*100).toFixed(0)}%)</span><span class="val">${moeda(fechado.impostos)}</span></div>
         <hr>
-        <div class="row" style="justify-content:space-between;font-size:18px"><span>Total</span><span class="val">${moeda(c.total)}</span></div>
+        <div class="row" style="justify-content:space-between;font-size:18px"><span>Total</span><span class="val">${moeda(fechado.total)}</span></div>
       `;
 
+      const validadeTxt = formatarDataBR($('validade').value);
       $('texto').value =
 `LOCAÇÃO ${c.tipo === 'metalon' ? 'DE PAINEL BACKDROP (METALON)' : 'DE ESTRUTURA BOXTRUSS'}
 
@@ -312,20 +424,24 @@ Iluminação: ${c.iluminacaoQtd > 0 ? c.iluminacaoQtd + ' Ribalta(s) LED' : 'nã
 Locação: 2 dias${c.foraHorario ? `
 Extra: Montagem/Desmontagem fora do horário – ${moeda(c.extraForaHorario)}` : ''}
 
-Subtotal: ${moeda(c.subtotal)}
-Impostos NF (${(c.impostosPct*100).toFixed(0)}%): ${moeda(c.impostos)}
-TOTAL: ${moeda(c.total)}
+Subtotal: ${moeda(fechado.subtotal)}
+Impostos NF (${(c.impostosPct*100).toFixed(0)}%): ${moeda(fechado.impostos)}
+TOTAL: ${moeda(fechado.total)}
 
 Estão inclusos no orçamento:
 ✅ Locação da estrutura Backdrop
 ✅ Impressão digital em lona fosca
 ✅ Serviço de instalação e retirada
 
-Valores válidos para serviço realizado no município do Rio de Janeiro – RJ.
+Valores válidos para serviço realizado no município do Rio de Janeiro – RJ.${validadeTxt ? `
+Proposta válida até ${validadeTxt}.` : ''}
 
 Observação: Serviços realizados fora do horário comercial, aos finais de semana ou em feriados poderão ter taxa adicional. Quando aplicável, essa taxa será previamente discriminada na proposta, de acordo com a necessidade e a solicitação do cliente.
 
-Condições de pagamento: Pix, depósito, boleto (sujeito à aprovação), cartão (taxas), e cripto.`;
+Condições de pagamento: Pix, depósito, boleto (sujeito à aprovação), cartão (taxas), e cripto.
+
+Veja as quatro opções com foto:
+${link}`;
 
       $('pdfInfo').innerHTML = `
         <div><b>Tipo:</b> ${c.tipo === 'metalon' ? 'Backdrop (Metalon tipo caixa)' : (c.tipo === 'boxtruss_envelopado' ? 'Boxtruss envelopado' : (c.tipo === 'boxtruss_envelopado_parcial' ? 'Boxtruss envelopado (parcial)' : 'Boxtruss aparente'))}</div>
@@ -339,9 +455,9 @@ Condições de pagamento: Pix, depósito, boleto (sujeito à aprovação), cart�
         <tr><td><b>Banner</b></td><td style="text-align:right">${moeda(c.bannerCusto)}</td></tr>
         <tr><td><b>Iluminação</b></td><td style="text-align:right">${moeda(c.iluminacaoCusto)}</td></tr>
         ${c.foraHorario ? `<tr><td><b>Extra</b></td><td style="text-align:right">${moeda(c.extraForaHorario)}</td></tr>` : ''}
-        <tr><td><b>Subtotal</b></td><td style="text-align:right">${moeda(c.subtotal)}</td></tr>
-        <tr><td><b>Impostos NF ${(c.impostosPct*100).toFixed(0)}%</b></td><td style="text-align:right">${moeda(c.impostos)}</td></tr>
-        <tr><td style="font-weight:700">Total</td><td style="text-align:right;font-weight:700">${moeda(c.total)}</td></tr>
+        <tr><td><b>Subtotal</b></td><td style="text-align:right">${moeda(fechado.subtotal)}</td></tr>
+        <tr><td><b>Impostos NF ${(c.impostosPct*100).toFixed(0)}%</b></td><td style="text-align:right">${moeda(fechado.impostos)}</td></tr>
+        <tr><td style="font-weight:700">Total</td><td style="text-align:right;font-weight:700">${moeda(fechado.total)}</td></tr>
       `;
     }
 
@@ -376,15 +492,72 @@ Condições de pagamento: Pix, depósito, boleto (sujeito à aprovação), cart�
       }
     }
 
+    function mostrarStatus(status, mensagem){
+      status.textContent = mensagem;
+      window.clearTimeout(mostrarStatus.timeoutId);
+      mostrarStatus.timeoutId = window.setTimeout(() => {
+        status.textContent = '';
+      }, 2500);
+    }
+
+    function copiarCampo(campo, status, ok, falha){
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(campo.value)
+          .then(() => mostrarStatus(status, ok))
+          .catch(() => mostrarStatus(status, falha));
+        return;
+      }
+      campo.focus();
+      campo.select();
+      campo.setSelectionRange(0, campo.value.length);
+      try {
+        const copiado = document.execCommand('copy');
+        mostrarStatus(status, copiado ? ok : falha);
+      } catch (error) {
+        mostrarStatus(status, falha);
+      }
+    }
+
+    function copiarLink(){
+      copiarCampo($('linkProposta'), $('linkStatus'), 'Link copiado.', 'Selecione o link e copie manualmente.');
+    }
+
+    function abrirProposta(){
+      window.open($('linkProposta').value, '_blank', 'noopener,noreferrer');
+    }
+
+    function enviarWhatsApp(){
+      const c = calcular();
+      const nome = $('clienteNome').value.trim().split(/\s+/)[0] || '';
+      const medidas = c.w.toFixed(2).replace('.', ',') + ' × ' + c.h.toFixed(2).replace('.', ',') + ' m';
+      const validadeTxt = formatarDataBR($('validade').value);
+      const msg =
+`Olá${nome ? ' ' + nome : ''}! Segue a proposta de locação de backdrop.
+
+${$('linkProposta').value}
+
+No link estão as quatro opções de estrutura, com foto e o valor de cada uma.
+Medidas: ${medidas}. Locação de 2 dias.
+Válida para serviço no Rio de Janeiro – RJ.${validadeTxt ? `
+Proposta válida até ${validadeTxt}.` : ''}`;
+      window.open('https://wa.me/?text=' + encodeURIComponent(msg), '_blank', 'noopener,noreferrer');
+    }
+
     function update(){ render(); }
 
-    ['tipo','largura','altura','iluminacaoQtd','foraHorario','bannerM2','bannerM2Env','bannerM2EnvParcial','boxtrussML','metalonML','iluminacaoUnit','impostosPct','extraForaHorarioValor']
-      .forEach(id => $(id).addEventListener('input', update));
+    ['tipo','largura','altura','iluminacaoQtd','foraHorario','bannerM2','bannerM2Env','bannerM2EnvParcial','boxtrussML','metalonML','iluminacaoUnit','impostosPct','extraForaHorarioValor','clienteNome','clienteEvento','validade']
+      .forEach(id => {
+        $(id).addEventListener('input', update);
+        $(id).addEventListener('change', update);
+      });
+
+    $('linkProposta').addEventListener('focus', function () { this.select(); });
 
     function gerarPDF(){
       window.print();
     }
 
+    if (!$('validade').value) $('validade').value = dataMaisDias(15);
     update();
   </script>
 </body>
