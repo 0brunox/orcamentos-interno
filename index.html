@@ -173,7 +173,7 @@
 
     <section class="card no-print" id="link-cliente">
       <h2 style="margin:0 0 8px 0;font-size:18px">Link para o cliente</h2>
-      <div class="muted k">O cliente abre no celular e vê as quatro opções, com foto e valor. A tabela de custos não entra no link. A opção escolhida em Tipo vai marcada como indicada.</div>
+      <div class="muted k">O cliente abre no celular e vê as quatro opções, com foto e valor. A tabela de custos não entra no link. A de menor valor leva o selo de opção mais econômica.</div>
 
       <div class="grid cols-3" style="margin-top:12px">
         <div>
@@ -403,7 +403,7 @@
       $('linkProposta').value = link;
       $('comparativo').innerHTML = todas.map(t => `
         <div class="opt-row">
-          <span>${t.nome}${t.id === c.tipo ? ' <span class="opt-on">· indicada</span>' : ''}</span>
+          <span>${t.nome}${t.id === c.tipo ? ' <span class="opt-on">· selecionada</span>' : ''}</span>
           <span class="val">${moeda(t.total)}</span>
         </div>
       `).join('');

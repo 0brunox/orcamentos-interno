@@ -72,7 +72,7 @@
       overflow: hidden;
       box-shadow: 0 10px 30px rgba(50, 36, 14, 0.05);
     }
-    .card.indicada { border-color: var(--accent); box-shadow: 0 10px 30px rgba(20, 92, 72, 0.12); }
+    .card.economica { border-color: var(--accent); box-shadow: 0 10px 30px rgba(20, 92, 72, 0.12); }
     .foto { display: block; width: 100%; padding: 0; border: 0; background: #e7e4de; cursor: zoom-in; }
     .foto img { display: block; width: 100%; height: 250px; object-fit: contain; }
     .miolo { padding: 16px 16px 18px; display: grid; gap: 8px; }
@@ -163,8 +163,8 @@
       const OPCOES = {
         boxtruss_aparente: {
           nome: 'Boxtruss com estrutura aparente',
-          resumo: 'A treliça fica visível em volta do banner.',
-          detalhe: 'Visual clássico de evento: a estrutura de alumínio aparece nas bordas e a lona cobre a frente.',
+          resumo: 'A opção mais econômica para eventos.',
+          detalhe: 'A lona cobre a frente e a estrutura de alumínio fica visível nas bordas.',
           img: 'mockups/boxtruss-aparente.jpg'
         },
         boxtruss_envelopado: {
@@ -175,8 +175,8 @@
         },
         boxtruss_envelopado_parcial: {
           nome: 'Boxtruss envelopado parcial',
-          resumo: 'Frente totalmente revestida e estrutura discretamente aparente nas laterais.',
-          detalhe: 'A lona cobre toda a face frontal, deixando apenas uma pequena parte da treliça visível nas laterais.',
+          resumo: 'Frente totalmente revestida, com a estrutura discretamente aparente nas laterais.',
+          detalhe: '',
           img: 'mockups/boxtruss-envelopado-parcial.jpg'
         },
         metalon: {
@@ -263,9 +263,6 @@
         if (!lista.length) return null;
         lista.sort((a, b) => ORDEM.indexOf(a.id) - ORDEM.indexOf(b.id));
         const sugerida = typeof data.s === 'string' && OPCOES[data.s] ? data.s : '';
-        if (sugerida) {
-          lista.sort((a, b) => (a.id === sugerida ? -1 : b.id === sugerida ? 1 : 0));
-        }
         const pct = Number(data.p);
         const extra = Number(data.x);
         return {
@@ -296,9 +293,9 @@
       function textoDelta(op, base) {
         if (!base || op.id === base.id) return '';
         const delta = Math.round(op.tot * 100) - Math.round(base.tot * 100);
-        if (delta === 0) return 'Mesmo valor da opção indicada';
+        if (delta === 0) return 'Mesmo valor da opção mais econômica';
         const valor = moeda(Math.abs(delta) / 100);
-        return delta > 0 ? valor + ' a mais que a opção indicada' : valor + ' a menos que a opção indicada';
+        return delta > 0 ? valor + ' a mais que a opção mais econômica' : valor + ' a menos que a opção mais econômica';
       }
 
       function mostrarAviso(titulo, texto) {
@@ -347,7 +344,7 @@
         anterior.addEventListener('click', () => passo(-1));
         const proxima = el('button', { type: 'button', text: 'Próxima' });
         proxima.addEventListener('click', () => passo(1));
-        const img = el('img', { src: op.info.img, alt: op.info.resumo });
+        const img = el('img', { src: op.info.img, alt: op.info.detalhe || op.info.resumo });
         luz.replaceChildren(
           el('div', { class: 'luz-topo' },
             el('strong', { text: op.info.nome }),
@@ -355,7 +352,7 @@
           ),
           el('figure', null,
             img,
-            el('figcaption', { text: op.info.resumo + ' Modelo sem arte impressa.' })
+            el('figcaption', { text: (op.info.detalhe || op.info.resumo) + ' Modelo sem arte impressa.' })
           ),
           el('div', { class: 'luz-nav' },
             anterior,
@@ -393,7 +390,7 @@
 
       function render(data) {
         ops = data.ops;
-        const base = data.ops.find(op => op.id === data.sugerida) || null;
+        const base = data.ops.reduce((menor, op) => op.tot < menor.tot ? op : menor);
         document.title = data.cliente ? 'Proposta para ' + data.cliente : 'Proposta de locação';
 
         const imprimir = el('button', { class: 'btn no-print', type: 'button', text: 'Imprimir ou salvar PDF' });
@@ -412,9 +409,9 @@
 
         const grade = el('div', { class: 'grade' });
         data.ops.forEach((op, indice) => {
-          const indicada = op.id === data.sugerida;
+          const economica = op.id === base.id;
           const foto = el('button', { class: 'foto', type: 'button', 'aria-label': 'Ampliar foto: ' + op.info.nome });
-          foto.append(el('img', { src: op.info.img, alt: op.info.resumo }));
+          foto.append(el('img', { src: op.info.img, alt: op.info.detalhe || op.info.resumo }));
           foto.addEventListener('click', () => abrirFoto(indice, foto));
           const pct = data.impostoPct == null
             ? ''
@@ -422,13 +419,13 @@
           const quebra = op.imp >= 0
             ? 'Subtotal ' + moeda(op.sub) + ' · Impostos NF' + pct + ' ' + moeda(op.imp)
             : '';
-          grade.append(el('article', { class: indicada ? 'card indicada' : 'card' },
+          grade.append(el('article', { class: economica ? 'card economica' : 'card' },
             foto,
             el('div', { class: 'miolo' },
-              indicada ? el('p', { class: 'selo', text: 'Opção indicada' }) : null,
+              economica ? el('p', { class: 'selo', text: 'Opção mais econômica' }) : null,
               el('h3', { text: op.info.nome }),
               el('p', { class: 'resumo', text: op.info.resumo }),
-              el('p', { class: 'detalhe', text: op.info.detalhe }),
+              op.info.detalhe ? el('p', { class: 'detalhe', text: op.info.detalhe }) : null,
               el('p', { class: 'preco', text: moeda(op.tot) }),
               quebra ? el('p', { class: 'quebra', text: quebra }) : null,
               textoDelta(op, base) ? el('p', { class: 'delta', text: textoDelta(op, base) }) : null
@@ -457,12 +454,12 @@
             el('div', null,
               el('p', { class: 'kicker', text: 'Locação de backdrop e boxtruss' }),
               el('h1', { text: titulo }),
-              el('p', { class: 'lede', text: 'As fotos são modelos sem arte. A impressão entra com a arte do seu evento. Toque em uma foto para ampliar e passar de uma estrutura para a outra.' })
+              el('p', { class: 'lede', text: 'As imagens mostram os diferentes tipos de acabamento disponíveis. A estrutura será produzida com a arte do seu evento. Clique nas opções para visualizar os detalhes de cada modelo.' })
             ),
             imprimir
           ),
           fatos,
-          el('h2', { text: 'Opções neste tamanho' }),
+          el('h2', { text: 'Escolha o acabamento ideal' }),
           grade,
           el('div', { class: 'notas' }, incluso, condicoes),
           el('p', { class: 'rodape', text: emissao ? 'Proposta emitida em ' + emissao + '.' : '' })
